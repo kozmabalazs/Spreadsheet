@@ -1,21 +1,22 @@
 package com.gmail.kozmazbalazs;
 
+import javafx.geometry.Pos;
+
 import java.security.InvalidParameterException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Spreadsheet {
 
 	private final static int SpreadsheetSize = 50;
 
-	private LinkedHashMap<Position, Cell> cells;
+	private HashMap<Position, Cell> cells;
+	private HashMap<Position, Cell> cellsTemp;
 	private static Spreadsheet INSTANCE;
 	private int matrix[][];
 
 	private Spreadsheet() {
-		cells = new LinkedHashMap<Position, Cell>();
+		cells = new HashMap<Position, Cell>();
+		cellsTemp = new HashMap<Position,Cell>();
 		matrix = new int[SpreadsheetSize][SpreadsheetSize];
 		for(int i=0; i<SpreadsheetSize; i++)
 			for (int j = 0; j < SpreadsheetSize; j++) {
@@ -38,26 +39,25 @@ public class Spreadsheet {
 		cells.put(position, cell);
 		int x = position.getX();
 		int y = position.getY();
-		if (y>1){
-			matrix[x][y-1] = 1;
-		}
-		matrix[x][y+1] = 1;
-		if (x>1){
+		if (x>=1){
 			matrix[x-1][y] = 1;
 		}
 		matrix[x+1][y] = 1;
+		if (y>=1){
+			matrix[x][y-1] = 1;
+		}
+		matrix[x][y+1] = 1;
 	}
 
 	public void mergeCells(Position ... positions)throws InvalidParameterException{
-		for(int i=0; i<positions.length - 1; i++){
-			if(positions[i].getX() != positions[i+1].getX()){
-				throw new InvalidParameterException("Not a row!");
-			}
-		}
 		Arrays.sort(positions, new Comparator<Position>() {
 			@Override
 			public int compare(Position o1, Position o2) {
-				return Integer.compare(o1.getY(), o2.getY());
+				int result = Integer.compare(o1.getX(), o2.getX());
+				if(result == 0){
+					result = Integer.compare(o1.getY(), o2.getY());
+				}
+				return result;
 			}
 		});
 
@@ -81,6 +81,15 @@ public class Spreadsheet {
 		}
 	}
 
+	public void showMatrix(){
+		for (int i = 0; i < 50; i++) {
+			for (int j = 0; j < 50; j++) {
+				System.out.print(matrix[i][j] + " ");
+			}
+			System.out.println();
+		}
+	}
+
 	public Position getPositionForCell(Cell cell) {
 		for (Map.Entry<Position, Cell> entry : cells.entrySet()) {
 			if (entry.getValue().equals(cell)) {
@@ -88,5 +97,34 @@ public class Spreadsheet {
 			}
 		}
 		return null;
+	}
+
+	public boolean containsCell(Cell cell) {
+		for (Map.Entry<Position, Cell> entry : cells.entrySet()) {
+			if (entry.getValue().equals(cell)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean containsPosition(Position position){
+		if (cells.containsKey(position)){
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public void lockCell(Cell cell){
+		Position p = getPositionForCell(cell);
+		cellsTemp.put(p, cells.get(p));
+		cells.remove(p);
+	}
+
+	public void unlockCell(Cell cell){
+		Position p = getPositionForCell(cell);
+		cells.put(p, cells.get(p));
+		cellsTemp.remove(p);
 	}
 }

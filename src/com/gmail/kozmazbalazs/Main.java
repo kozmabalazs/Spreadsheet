@@ -1,5 +1,7 @@
 package com.gmail.kozmazbalazs;
 
+import javafx.geometry.Pos;
+
 import java.security.InvalidParameterException;
 import java.util.Random;
 
@@ -24,6 +26,9 @@ public class Main {
 		Position p12 = new Position(2, 3);
 		Position p13 = new Position(3, 0);
 		Position p14 = new Position(3, 1);
+		Position p15 = new Position(4, 0);
+		Position p16 = new Position(4, 1);
+		Position p17 = new Position(4, 2);
 
 		sp.addCell(p1, new ValueCell(random.nextInt(10)));
 		sp.addCell(p2, new ValueCell(random.nextInt(10)));
@@ -34,30 +39,30 @@ public class Main {
 		sp.addCell(p7, new ValueCell(random.nextInt(10)));
 		sp.addCell(p8, new ValueCell(random.nextInt(10)));
 
-		sp.addCell(p9, new FormulaCell());
-		((FormulaCell)sp.getCellByPosition(p9)).setFormula(p1, p2, Operator.ADD);
-		sp.addCell(p10, new FormulaCell());
-		((FormulaCell)sp.getCellByPosition(p10)).setFormula(p3, p4, Operator.SUBTRACT);
-		sp.addCell(p11, new FormulaCell());
-		((FormulaCell)sp.getCellByPosition(p11)).setFormula(p5, p6, Operator.MULTIPLY);
-		sp.addCell(p12, new FormulaCell());
+		sp.addCell(p9, new FormulaCell(p1, p2, Operator.ADD));
+		sp.addCell(p10, new FormulaCell(p3, p4, Operator.SUBTRACT));
+		sp.addCell(p11, new FormulaCell(p5, p6, Operator.MULTIPLY));
 		try {
-			((FormulaCell)sp.getCellByPosition(p12)).setFormula(p12, p8, Operator.DIVIDE);
-		} catch (InvalidParameterException e){
+			sp.addCell(p12, new FormulaCell(p12, p8, Operator.DIVIDE));
+		} catch (InvalidParameterException e) {
 			System.out.println(e.getMessage());
 		}
 
 		sp.showSpreadsheet();
 
-		sp.addCell(p13, new ReferenceCell());
-		((ReferenceCell)sp.getCellByPosition(p13)).setReference(p1);
-		sp.addCell(p14, new ReferenceCell());
-		((ReferenceCell)sp.getCellByPosition(p14)).setReference(p13);
+		sp.addCell(p13, new ReferenceCell(p1));
+		sp.addCell(p14, new ReferenceCell(p13));
 
 		sp.showSpreadsheet();
 
-		sp.mergeCells(p1, p2, p3);
+		sp.mergeCells(p1, p3);
 
 		sp.showSpreadsheet();
+
+		((FormulaCell)sp.getCellByPosition(p9)).setNewFormula(p10, p11, Operator.ADD);
+		((FormulaCell)sp.getCellByPosition(p10)).setNewFormula(p9, p11, Operator.ADD);
+		((FormulaCell)sp.getCellByPosition(p11)).setNewFormula(p9, p10, Operator.ADD);
+
+
 	}
 }
